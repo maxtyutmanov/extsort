@@ -9,13 +9,16 @@ namespace ExtSort.Sorter
         {
             if (args.Length < 1)
             {
-                Console.WriteLine("Specify the file that needs to be sorted");
+                Console.WriteLine("Specify full path to the file that needs to be sorted");
+                Console.ReadLine();
                 return -1;
             }
 
             if (!File.Exists(args[0]))
             {
                 Console.WriteLine("File {0} does not exist", args[0]);
+                Console.ReadLine();
+                return -1;
             }
             
             var extSort = new ExternalSort();

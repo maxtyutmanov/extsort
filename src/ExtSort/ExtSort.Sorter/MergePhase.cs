@@ -55,11 +55,12 @@ namespace ExtSort.Sorter
 
         private void MergeSingleBatch(List<string> filePaths, Stream output, Encoding encoding = null)
         {
+            using var _ = Measured.Operation($"merge batch (phase {Number})");
+
             var sortedTmpEnumerables = filePaths
                 .Select(ReadLinesFromFile)
                 .ToArray();
 
-            using var op = Measured.Operation($"merge batch (phase {Number})");
             using var writer = new StreamWriter(output, encoding ?? Encoding.UTF8, (int)64.Mb(), leaveOpen: true);
             foreach (var line in KWayMerge<string>.Execute(sortedTmpEnumerables, ComparisonUtils.CompareFileLines))
             {

@@ -55,7 +55,6 @@ namespace ExtSort.Sorter
                 
                 var initialFilesCount = Directory.EnumerateFiles(tempDirPath, TempFilePaths.SearchPatternForPhase(1)).Count();
                 var optimalMaxFilesCount = CalculateOptimalMaxFilesCountToMerge(initialFilesCount);
-                Console.WriteLine("Files count for single merge: {0}", optimalMaxFilesCount);
 
                 var mergePhase = new MergePhase(1, tempDirPath, optimalMaxFilesCount);
                 while (!mergePhase.CanRunFinal)

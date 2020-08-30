@@ -7,8 +7,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\ExtSort.Common\ExtSort.Common.csproj" />
-    <ProjectReference Include="..\ExtSort.Generator\ExtSort.Generator.csproj" />
-    <ProjectReference Include="..\ExtSort.Sorter\ExtSort.Sorter.csproj" />
   </ItemGroup>
 
 </Project>

@@ -5,10 +5,21 @@ namespace ExtSort.Generator
 {
     class Program
     {
-        static void Main(string[] args)
+        static int Main(string[] args)
         {
+            if (args.Length < 2)
+            {
+                Console.WriteLine("Specify path to file to generate, and size of file in GB");
+                Console.ReadLine();
+                return -1;
+            }
+
+            var filePath = args[0];
+            var fileSize = int.Parse(args[1]).Gb();
+
             var generator = new FileGenerator();
-            generator.Run(10.Gb(), @"F:\Work\ExtSortTest\out.txt");
+            generator.Run(fileSize, filePath);
+            return 0;
         }
     }
 }
