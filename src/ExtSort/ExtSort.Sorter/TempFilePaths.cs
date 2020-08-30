@@ -8,7 +8,7 @@ namespace ExtSort.Sorter
     {
         public const string SearchPattern = "*.sorttmp*";
 
-        public static string SearchPatterForPhase(int phaseNumber) => $"*.sorttmp{phaseNumber}";
+        public static string SearchPatternForPhase(int phaseNumber) => $"*.sorttmp{phaseNumber}";
 
         public static string ExtensionForPhase(int phaseNumber) => $"sorttmp{phaseNumber}";
     }

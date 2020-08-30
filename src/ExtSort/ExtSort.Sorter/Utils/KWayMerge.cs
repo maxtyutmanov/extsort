@@ -33,7 +33,7 @@ namespace ExtSort.Sorter
             }
         }
 
-        public static IEnumerable<T> Execute(IEnumerable<T>[] sortedEnumerables, Comparison<T> comparison)
+        public static IEnumerable<T> Execute(IEnumerable<IEnumerable<T>> sortedEnumerables, Comparison<T> comparison)
         {
             var enumerators = sortedEnumerables.Select(e => e.GetEnumerator()).ToArray();
 

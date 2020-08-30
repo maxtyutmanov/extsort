@@ -10,17 +10,21 @@ namespace ExtSort.Sorter
     public class MergePhase
     {
         private readonly List<List<string>> _inputBatches;
-        private readonly int _phaseNumber;
         private readonly string _directoryPath;
         private readonly int _maxSourceFiles;
 
+        public int Number { get; }
+
         public MergePhase(int phaseNumber, string directoryPath, int maxSourceFiles)
         {
-            _inputBatches = Directory
-                .EnumerateFiles(directoryPath, TempFilePaths.SearchPatterForPhase(phaseNumber))
+            var sourceFilePaths = Directory
+                .EnumerateFiles(directoryPath, TempFilePaths.SearchPatternForPhase(phaseNumber));
+
+            _inputBatches = sourceFilePaths
                 .GetByBatches(maxSourceFiles)
                 .ToList();
-            _phaseNumber = phaseNumber;
+
+            Number = phaseNumber;
             _directoryPath = directoryPath;
             _maxSourceFiles = maxSourceFiles;
         }
@@ -37,16 +41,16 @@ namespace ExtSort.Sorter
 
         public MergePhase RunIntermediate()
         {
-            var batchIx = 1;
-            foreach (var inputBatch in _inputBatches)
-            {
-                var outputPath = Path.Combine(_directoryPath, $"{batchIx}.{TempFilePaths.ExtensionForPhase(_phaseNumber + 1)}");
-                using var output = File.Open(outputPath, FileMode.Create, FileAccess.Write, FileShare.None);
-                MergeSingleBatch(inputBatch, output);
-                ++batchIx;
-            }
+            _inputBatches.ForEach(MergeSingleBatchToIntermediateOutput);
+            return new MergePhase(Number + 1, _directoryPath, _maxSourceFiles);
+        }
 
-            return new MergePhase(_phaseNumber + 1, _directoryPath, _maxSourceFiles);
+        private void MergeSingleBatchToIntermediateOutput(List<string> inputFilePaths)
+        {
+            var batchName = Guid.NewGuid().ToString();
+            var outputPath = Path.Combine(_directoryPath, $"{batchName}.{TempFilePaths.ExtensionForPhase(Number + 1)}");
+            using var output = File.Open(outputPath, FileMode.Create, FileAccess.Write, FileShare.None);
+            MergeSingleBatch(inputFilePaths, output);
         }
 
         private void MergeSingleBatch(List<string> filePaths, Stream output, Encoding encoding = null)
@@ -55,20 +59,21 @@ namespace ExtSort.Sorter
                 .Select(ReadLinesFromFile)
                 .ToArray();
 
-            using var op = Measured.Operation($"merge batch (phase {_phaseNumber})");
-            using var writer = new StreamWriter(output, encoding ?? Encoding.UTF8, bufferSize: 10_000_000, leaveOpen: true);
+            using var op = Measured.Operation($"merge batch (phase {Number})");
+            using var writer = new StreamWriter(output, encoding ?? Encoding.UTF8, (int)64.Mb(), leaveOpen: true);
             foreach (var line in KWayMerge<string>.Execute(sortedTmpEnumerables, ComparisonUtils.CompareFileLines))
             {
                 writer.WriteLine(line);
             }
 
             filePaths.ForEach(File.Delete);
+            
         }
 
         private static IEnumerable<string> ReadLinesFromFile(string filePath)
         {
             using var file = File.Open(filePath, FileMode.Open, FileAccess.Read, FileShare.None);
-            using var reader = new StreamReader(file, bufferSize: 10_000_000);
+            using var reader = new StreamReader(file, bufferSize: (int)16.Mb());
 
             while (!reader.EndOfStream)
             {

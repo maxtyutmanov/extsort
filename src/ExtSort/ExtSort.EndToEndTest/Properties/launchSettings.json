@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "ExtSort.EndToEndTest": {
+      "commandName": "Project",
+      "commandLineArgs": "F:\\Work\\ExtSortTest"
+    }
+  }
+}

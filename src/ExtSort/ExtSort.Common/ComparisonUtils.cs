@@ -9,10 +9,6 @@ namespace ExtSort.Common
             var dotIx1 = line1.IndexOf('.');
             var dotIx2 = line2.IndexOf('.');
 
-            //// TODO: we can save some GC work by not using substring
-            //var str1 = line1.Substring(dotIx1 + 2);
-            //var str2 = line2.Substring(dotIx2 + 2);
-
             var strCompareResult = string.Compare(
                 line1, dotIx1 + 2, line2, dotIx2 + 2, Math.Max(line1.Length, line2.Length), StringComparison.OrdinalIgnoreCase);
 
