@@ -1,4 +1,9 @@
-<h2>Multiphase merge sort</h2>
+<h1>Multiphase merge sort</h1>
+
+<h2>Prerequisites</h2>
+<ul>
+<li>.net core 3.1 sdk</li>
+</ul>
 
 <h3>How to build:</h3>
 
