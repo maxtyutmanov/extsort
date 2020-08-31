@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace ExtSort.Common
@@ -23,6 +24,14 @@ namespace ExtSort.Common
 
             if (batch.Count != 0)
                 yield return batch;
+        }
+
+        public static DisposableList<T> ToDisposableList<T>(this IEnumerable<T> source)
+            where T: IDisposable
+        {
+            var dl = new DisposableList<T>();
+            dl.AddRange(source);
+            return dl;
         }
     }
 }

@@ -5,12 +5,30 @@ namespace ExtSort.Sorter.Config
 {
     public class SortConfig
     {
-        public int MaxFilesToMerge { get; set; } = 15;
+        public int MaxFilesToMerge { get; set; } = 85;
 
-        public long InMemorySortedChunkBytes { get; set; } = 64.Mb();
+        public long InMemorySortedChunkBytes { get; set; } = 128.Mb();
 
-        public int InputFileBufferBytes { get; set; } = (int)32.Mb();
+        public int InMemorySorterThreadsCount { get; set; } = 1;
 
-        public int InMemorySorterThreadsCount { get; set; } = Environment.ProcessorCount;
+        public FileBuffersConfig FileBuffers { get; set; } = new FileBuffersConfig();
+
+        public QueuesConfig Queues { get; set; } = new QueuesConfig();
+    }
+
+    public class FileBuffersConfig
+    {
+        public long InitialSortInputFileBufferSize { get; set; } = 32.Mb();
+
+        public long MergePhaseInputFileBufferSize { get; set; } = 2.Mb();
+
+        public long InitialSortOutputFileBufferSize { get; set; } = 4.Mb();
+
+        public long MergePhaseOutputFileBufferSize { get; set; } = 32.Mb();
+    }
+
+    public class QueuesConfig
+    {
+        public int MergePhaseQueueCapacity { get; set; } = 128;
     }
 }
