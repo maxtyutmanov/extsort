@@ -7,7 +7,7 @@ namespace ExtSort.Sorter.Config
     {
         public int MaxFilesToMerge { get; set; } = 15;
 
-        public long InMemorySortedChunkBytes { get; set; } = 64.Mb();
+        public long InMemorySortedChunkBytes { get; set; } = 128.Mb();
 
         public int InputFileBufferBytes { get; set; } = (int)32.Mb();
 

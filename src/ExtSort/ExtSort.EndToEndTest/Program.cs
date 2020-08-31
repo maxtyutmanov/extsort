@@ -21,7 +21,7 @@ namespace ExtSort.EndToEndTest
             Directory.CreateDirectory(testDir);
             var generatedFilePath = Path.Combine(testDir, "gen.txt");
             var generator = new FileGenerator();
-            generator.Run(1.Gb(), generatedFilePath);
+            generator.Run(10.Gb(), generatedFilePath);
 
             var initialFileHash = GetFileHashCode(generatedFilePath);
 

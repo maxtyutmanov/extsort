@@ -3,10 +3,12 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using ExtSort.Common;
 using ExtSort.Sorter.Config;
+using ExtSort.Sorter.Utils;
 
 namespace ExtSort.Sorter
 {
@@ -39,12 +41,12 @@ namespace ExtSort.Sorter
 
             PrepareTempDirectory(tempDirPath);
 
-            using var reader = new StreamReader(input, bufferSize: _config.InputFileBufferBytes, leaveOpen: true);
+            //using var reader = new StreamReader(input, bufferSize: _config.InputFileBufferBytes, leaveOpen: true);
 
             using (var initSortOp = Measured.Operation("initial sort phase"))
             {
                 var sortPhase = new ChunkedSortPhase(_config);
-                sortPhase.Run(reader, tempDirPath, ct);
+                sortPhase.Run(new ReadonlyStream(input), tempDirPath, ct);
             }
 
             using (var mergeOp = Measured.Operation("all merge phases"))
@@ -64,7 +66,7 @@ namespace ExtSort.Sorter
                 }
                 // finally, merge everything back to input file
                 input.Position = 0;
-                mergePhase.RunFinal(input, reader.CurrentEncoding);
+                mergePhase.RunFinal(input, Encoding.UTF8);
             }
         }
 

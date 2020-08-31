@@ -1,9 +1,15 @@
-﻿using System;
+﻿using ExtSort.Common.Model;
+using System;
 
 namespace ExtSort.Common
 {
     public static class ComparisonUtils
     {
+        public static int CompareLines(ILine line1, ILine line2)
+        {
+            return line1.CompareTo(line2);
+        }
+
         public static int CompareFileLines(string line1, string line2)
         {
             var dotIx1 = line1.IndexOf('.');
