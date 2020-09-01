@@ -127,7 +127,7 @@ namespace ExtSort.Sorter
             var sortFilePath = Path.Combine(tempDirPath, $"{Guid.NewGuid()}.{TempFilePaths.ExtensionForPhase(1)}");
             using var tmpFile = File.Open(sortFilePath, FileMode.Create, FileAccess.Write, FileShare.None);
             //using var writer = new StreamWriter(tmpFile, bufferSize: (int)8.Mb());
-            using var writer = new FastWriter(tmpFile, (int)16.Mb());
+            using var writer = new FastWriter(tmpFile, (int)32.Mb());
 
             foreach (var line in sortedBuffer)
             {

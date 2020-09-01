@@ -83,7 +83,6 @@ namespace ExtSort.Common.Model
 
         private void WriteNumberToStream(Stream stream, byte[] digitBuffer)
         {
-            var minus = _number < 0;
             var number = Math.Abs(_number);
             var digit = 0;
             while (number != 0)
@@ -97,11 +96,6 @@ namespace ExtSort.Common.Model
             {
                 stream.WriteByte(Convert.ToByte('0'));
                 return;
-            }
-
-            if (minus)
-            {
-                stream.WriteByte(Convert.ToByte('-'));
             }
 
             // the buffer contains digits in reversed order

@@ -20,7 +20,11 @@ namespace ExtSort.PerfTest
 
             var generator = new FileGenerator();
             generator.Run(fileSize, filePath);
-            var extSort = new ExternalSort();
+            var extSort = new ExternalSort(new Sorter.Config.SortConfig()
+            {
+                InMemorySortedChunkBytes = 256.Mb(),
+                MaxFilesToMerge = 40
+            });
             extSort.Run(filePath);
 
             return 0;

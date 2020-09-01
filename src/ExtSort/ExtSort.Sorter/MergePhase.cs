@@ -60,47 +60,22 @@ namespace ExtSort.Sorter
         {
             using var _ = Measured.Operation($"merge batch (phase {Number})");
 
-            //var sortedTmpEnumerables = filePaths
-            //    .Select(ReadLinesFromFile)
-            //    .ToArray();
-
-            var inputQueues = filePaths.Select(_ => new BlockingCollection<ILine>(100_000)).ToList();
-            var mergedOutputQueue = new BlockingCollection<ILine>(1_000_000);
+            using var inputQueues = filePaths.Select(_ => new BlockingCollection<ILine>(10_000)).ToDisposableList();
             var inputReaderTask = RunInputReader(filePaths, inputQueues);
-            var mergerTask = RunMerger(inputQueues, mergedOutputQueue);
-
-            using var writer = new FastWriter(output, (int)128.Mb());
-            foreach (var line in mergedOutputQueue.GetConsumingEnumerable())
-            {
-                writer.WriteLine(line);
-            }
-
-            //using var writer = new StreamWriter(output, encoding ?? Encoding.UTF8, (int)64.Mb(), leaveOpen: true);
-            //using var writer = new FastWriter(output, (int)64.Mb());
-            //foreach (var line in KWayMerge<ILine>.Execute(inputEnumerables, ComparisonUtils.CompareLines))
-            //{
-            //    writer.WriteLine(line);
-            //}
-
+            MergerProc(inputQueues, output);
+            inputReaderTask.Wait();
             filePaths.ForEach(File.Delete);
         }
 
-        private Task RunMerger(List<BlockingCollection<ILine>> inputs, BlockingCollection<ILine> output)
+        private void MergerProc(List<BlockingCollection<ILine>> inputs, Stream output)
         {
-            return Task.Run(() => MergerProc(inputs, output));
-        }
-
-        private void MergerProc(List<BlockingCollection<ILine>> inputs, BlockingCollection<ILine> output)
-        {
+            using var writer = new FastWriter(output, (int)16.Mb());
             var inputEnumerables = inputs.Select(q => q.GetConsumingEnumerable()).ToList();
 
             foreach (var line in KWayMerge<ILine>.Execute(inputEnumerables, ComparisonUtils.CompareLines))
             {
-                output.Add(line);
+                writer.WriteLine(line);
             }
-
-            output.CompleteAdding();
-            Console.WriteLine("Finished merging data for phase {0}", Number);
         }
 
         private Task RunInputReader(IEnumerable<string> filePaths, List<BlockingCollection<ILine>> outputs)
@@ -110,11 +85,10 @@ namespace ExtSort.Sorter
 
         private void InputReaderProc(IEnumerable<string> filePaths, List<BlockingCollection<ILine>> outputs)
         {
-            List<IEnumerator<ILine>> lineStreams = null;
-
             try
             {
-                lineStreams = filePaths.Select(ReadLinesFromFile).Select(e => e.GetEnumerator()).ToList();
+                using var lineStreams = filePaths.Select(ReadLinesFromFile).Select(e => e.GetEnumerator()).ToDisposableList();
+
                 var activeStreamsCount = lineStreams.Count;
 
                 while (activeStreamsCount > 0)
@@ -123,9 +97,9 @@ namespace ExtSort.Sorter
                     {
                         if (lineStreams[i].MoveNext())
                         {
-                            outputs[i].Add(lineStreams[i].Current);
+                            outputs[i].TryAdd(lineStreams[i].Current, 1);
                         }
-                        else
+                        else if (!outputs[i].IsAddingCompleted)
                         {
                             outputs[i].CompleteAdding();
                             activeStreamsCount--;
@@ -135,8 +109,6 @@ namespace ExtSort.Sorter
             }
             finally
             {
-                Console.WriteLine("Finished reading input for phase {0}", Number);
-                lineStreams?.ForEach(ls => ls.Dispose());
                 outputs.Where(o => !o.IsAddingCompleted).ToList().ForEach(o => o.CompleteAdding());
             }
         }
@@ -144,8 +116,7 @@ namespace ExtSort.Sorter
         private static IEnumerable<ILine> ReadLinesFromFile(string filePath)
         {
             using var file = File.Open(filePath, FileMode.Open, FileAccess.Read, FileShare.None);
-            //using var reader = new StreamReader(file, bufferSize: (int)16.Mb());
-            using var reader = new FastReader(file, (int)64.Mb());
+            using var reader = new FastReader(file, (int)8.Mb());
 
             while (!reader.EndOfStream)
             {

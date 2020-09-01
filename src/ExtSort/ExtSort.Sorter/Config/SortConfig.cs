@@ -5,12 +5,12 @@ namespace ExtSort.Sorter.Config
 {
     public class SortConfig
     {
-        public int MaxFilesToMerge { get; set; } = 15;
+        public int MaxFilesToMerge { get; set; } = 40;
 
-        public long InMemorySortedChunkBytes { get; set; } = 128.Mb();
+        public long InMemorySortedChunkBytes { get; set; } = 256.Mb();
 
         public int InputFileBufferBytes { get; set; } = (int)32.Mb();
 
-        public int InMemorySorterThreadsCount { get; set; } = Environment.ProcessorCount;
+        public int InMemorySorterThreadsCount { get; set; } = 2;
     }
 }
